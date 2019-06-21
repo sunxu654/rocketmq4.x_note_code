@@ -35,5 +35,7 @@ public class PayProducer {
             e.printStackTrace();
         }
     }
-
+    /**
+     * git功能测试
+     */
 }
