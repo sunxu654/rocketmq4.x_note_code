@@ -1,5 +1,6 @@
 package com.sunxu.rocketmq.controller;
 
+import com.sunxu.rocketmq.jms.JmsConfig;
 import com.sunxu.rocketmq.jms.PayProducer;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -18,7 +19,6 @@ public class PayController {
     @Autowired
     PayProducer payProducer;
 
-    public static final String topic = "xdclass_pay_test_topic";
 
     @RequestMapping("/api/v1/pay_cb")
     public Object callback(String text) throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
@@ -26,10 +26,10 @@ public class PayController {
          * message需要topic tag 和 字节数组
          * 也有其他的构造函数,传不同的参数
          */
-        Message message = new Message(topic, "taga", ("hello rocketmq = " + text).getBytes());
+        Message message = new Message(JmsConfig.TOPIC, "taga", ("hello rocketmq = " + text).getBytes());
         /**
          * 把message通过producer发送出去
-         * 发送到哪里了?
+         * 发送到消息队列 等待消费者消费
          */
         SendResult sendResult = payProducer.getProducer().send(message);
 

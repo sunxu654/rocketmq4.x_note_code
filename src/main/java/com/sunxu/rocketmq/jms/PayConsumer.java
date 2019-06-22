@@ -17,9 +17,7 @@ import java.util.List;
 public class PayConsumer {
 
     private String consumerGroup = "consumer_group";
-    private String nameServerAddr = "192.168.245.4:9876";
 
-    public static final String topic = "xdclass_pay_test_topic";
 
     private DefaultMQPushConsumer consumer;
 
@@ -32,7 +30,7 @@ public class PayConsumer {
         /**
          * 设置nameserver地址
          */
-        consumer.setNamesrvAddr(nameServerAddr);
+        consumer.setNamesrvAddr(JmsConfig.NAME_SERVER);
 
         /**
          * 消费信息的起始方式
@@ -42,8 +40,11 @@ public class PayConsumer {
         /**
          * 订阅某个主题,并消费标签匹配为 * 的消息
          */
-        consumer.subscribe(topic, "*");
+        consumer.subscribe(JmsConfig.TOPIC, "*");
 
+        /**
+         * 取出消息的消费方式
+         */
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             @Override
             public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> list,

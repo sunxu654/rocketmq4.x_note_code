@@ -10,7 +10,6 @@ public class PayProducer {
      * producer的组和名称服务器
      */
     private String producerGroup = "pay_group";
-    private String nameServerAddr = "192.168.245.4:9876";
 
     public DefaultMQProducer getProducer() {
         return this.producer;
@@ -24,7 +23,7 @@ public class PayProducer {
         /**
          * 可以设置多个nameserver,形式:"<ip>,<ip>,<ip>"
          */
-        producer.setNamesrvAddr(nameServerAddr);
+        producer.setNamesrvAddr(JmsConfig.NAME_SERVER);
 
         start();
     }
