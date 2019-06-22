@@ -33,7 +33,9 @@
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
-            <version>4.3.0</version>
+            <!--此版本要和rocketmq的服务版本相同,enableTopicCreate=true 才会生效,不然无法通过代码创建topic,只能手工创建,
+            生产环境中只能手工创建,防止重名冲突-->
+            <version>4.4.0</version>
         </dependency>
 
     </dependencies>

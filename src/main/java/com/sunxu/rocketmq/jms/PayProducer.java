@@ -10,7 +10,11 @@ public class PayProducer {
      * producer的组和名称服务器
      */
     private String producerGroup = "pay_group";
-    private String nameServerAddr = "localhost:9876";
+    private String nameServerAddr = "192.168.245.4:9876";
+
+    public DefaultMQProducer getProducer() {
+        return this.producer;
+    }
 
     private DefaultMQProducer producer;
 
@@ -35,7 +39,13 @@ public class PayProducer {
             e.printStackTrace();
         }
     }
+
     /**
      * git功能测试
      */
+
+    public void shutdown() {
+        this.producer.shutdown();
+
+    }
 }
