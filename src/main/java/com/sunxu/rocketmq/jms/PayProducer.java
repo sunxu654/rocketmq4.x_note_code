@@ -19,7 +19,17 @@ public class PayProducer {
 
     public PayProducer() {
         producer = new DefaultMQProducer(producerGroup);
-
+        /**
+         * producer在发送之后的重试次数
+         * 配置一般在创建对象成功后进行配置
+         *
+         * 通过set... 来配置
+         *
+         * 也可以写一个配置文件,通过${key}来配置
+         *
+         * 配置的默认值,可以查看setRetryTimesWhenSendFailed(2)内部的情况
+         */
+        producer.setRetryTimesWhenSendFailed(2);
         /**
          * 可以设置多个nameserver,形式:"<ip>,<ip>,<ip>"
          */
