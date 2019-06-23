@@ -27,7 +27,24 @@ public class PayController {
          * message需要topic tag 和 字节数组
          * 也有其他的构造函数,传不同的参数
          */
-        Message message = new Message(JmsConfig.TOPIC, "taga","123",("hello rocketmq = " + text).getBytes());
+        Message message = new Message(JmsConfig.TOPIC, "taga", "123", ("hello rocketmq = " + text).getBytes());
+        /**
+         * message 由producer发送到broker之后,不立即被消费,而是等待一个timelevel之后
+         *
+         * timelevel每个level对应的时间是由rocketmq的源码包里:E:\GitHub\rocketmq-master\store\src\main\java\org\apache\\rocketmq
+         * \store\config\MessageStoreConfig.java 里面的
+         * private String messageDelayLevel = "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h"
+         * 决定的;
+         *
+         * messageDelayLevel的值不可以通过配置文件修改,但是可以修改源码的值,再重新编译,来做一份自定义版的rocketmq
+         *
+         * 应用场景:消息生产和消费有时间窗口要求：比如在天猫电商交易中超时未支付关闭订单的场景，在订单创建时会发送一条延时消息.这条消息将会在30分钟
+         * 以后投递给消费者，消费者收到此消息后需要判断对应的订单是否已完成支付。如支付未完成，则关闭订单。如已完成支付则忽略
+         *
+         *
+         */
+        message.setDelayTimeLevel(3);
+
 //       发送方式 1 : 同步发送
 //        /**
 //         * 把message通过producer发送出去
