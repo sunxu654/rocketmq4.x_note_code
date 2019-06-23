@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
-
+pull conflict 测试
 <<<<<<< Updated upstream
 到了head^^后 增加的消息  commit了
         到了head^^后 增加的消息  没有commit
