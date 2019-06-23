@@ -26,7 +26,7 @@ public class PayController {
          * message需要topic tag 和 字节数组
          * 也有其他的构造函数,传不同的参数
          */
-        Message message = new Message(JmsConfig.TOPIC, "taga", ("hello rocketmq = " + text).getBytes());
+        Message message = new Message(JmsConfig.TOPIC, "taga","123",("hello rocketmq = " + text).getBytes());
         /**
          * 把message通过producer发送出去
          * 发送到消息队列 等待消费者消费
