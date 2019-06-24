@@ -93,16 +93,26 @@ public class PayController {
          * msg是投递的消息
          * arg是投递队列的下标
          */
-        SendResult sendResult = payProducer.getProducer().send(message, (mqs, msg, arg) -> {
-             int queueNum = Integer.parseInt(arg.toString());
-             return mqs.get(queueNum);
-         }, 0);
+
         /**
-         * 打印出来,看一下是否是放在了arg下标对应的队列里
-         * SendResult [sendStatus=SEND_OK, msgId=C0A8016721BC18B4AAC27B3F064C0000, offsetMsgId=C0A8F50400002A9F000000000002DDAF, messageQueue=MessageQueue [topic=xdclass_pay_test_topic, brokerName=broker-a, queueId=0], queueOffset=5]
-         * ConsumeMessageThread_1 Recieve New Message hello rocketmq = 624
+         * 使用callback方式,send函数是没有返回值的
          */
-        System.out.println(sendResult);
+        payProducer.getProducer().send(message, (mqs, msg, arg) -> {
+            int queueNum = Integer.parseInt(arg.toString());
+            return mqs.get(queueNum);
+        }, 0, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+                System.out.println("发送成功后,可以在此添加一些异步业务");
+            }
+
+            @Override
+            public void onException(Throwable e) {
+                System.out.println("发送失败,将失败信息存储,等待工程师解决");
+            }
+        });
+
+//        System.out.println(sendResult);
 
         return new HashMap<>();
     }
