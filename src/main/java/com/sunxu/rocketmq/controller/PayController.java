@@ -88,18 +88,15 @@ public class PayController {
          *
          * 用于负载均衡队列
          */
-        SendResult sendResult = payProducer.getProducer().send(message, new MessageQueueSelector() {
-            @Override
-            /**
-             * mqs是消息队列
-             * msg是投递的消息
-             * arg是投递队列的下标
-             */
-            public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
-                int queueNum = Integer.parseInt(arg.toString());
-                return mqs.get(queueNum);
-            }
-        }, 0);
+        /**
+         * mqs是消息队列
+         * msg是投递的消息
+         * arg是投递队列的下标
+         */
+        SendResult sendResult = payProducer.getProducer().send(message, (mqs, msg, arg) -> {
+             int queueNum = Integer.parseInt(arg.toString());
+             return mqs.get(queueNum);
+         }, 0);
         /**
          * 打印出来,看一下是否是放在了arg下标对应的队列里
          * SendResult [sendStatus=SEND_OK, msgId=C0A8016721BC18B4AAC27B3F064C0000, offsetMsgId=C0A8F50400002A9F000000000002DDAF, messageQueue=MessageQueue [topic=xdclass_pay_test_topic, brokerName=broker-a, queueId=0], queueOffset=5]
