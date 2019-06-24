@@ -4,15 +4,18 @@ import com.sunxu.rocketmq.jms.JmsConfig;
 import com.sunxu.rocketmq.jms.PayProducer;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.client.producer.MessageQueueSelector;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 public class PayController {
@@ -54,32 +57,49 @@ public class PayController {
 //        System.out.println(sendResult);
 
 //        发送方式2 :异步发送
-        /**
-         *
-         * 异步发送消息和回调
-         * 在发送消息的同时,开一个线程来做一些对时间要求比较敏感的业务逻辑
-         * 比如用户注册成功后,直接在本地的onsuccess里面调用发放优惠券服务,而不需要用户的消息传输完成再发送
-         */
-        payProducer.getProducer().send(message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-                System.out.printf("发送结果= %s , sendResult详细信息=%s",sendResult.getSendStatus(),sendResult.toString());
-            }
-
-            @Override
-            public void onException(Throwable e) {
-                e.printStackTrace();
-                //TODO 补偿机制,比如重新发送
-            }
-        });
+//        /**
+//         *
+//         * 异步发送消息和回调
+//         * 在发送消息的同时,开一个线程来做一些对时间要求比较敏感的业务逻辑
+//         * 比如用户注册成功后,直接在本地的onsuccess里面调用发放优惠券服务,而不需要用户的消息传输完成再发送
+//         */
+//        payProducer.getProducer().send(message, new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//                System.out.printf("发送结果= %s , sendResult详细信息=%s",sendResult.getSendStatus(),sendResult.toString());
+//            }
+//
+//            @Override
+//            public void onException(Throwable e) {
+//                e.printStackTrace();
+//                //TODO 补偿机制,比如重新发送
+//            }
+//        });
 
 //        发送方式3: send one way
+//        /**
+//         * 用于给logserver等不需要响应,对性能要求比较高,对可靠性要求比较低的服务 发送请求
+//         * 返回值为空,ublic void sendOneway(Message msg)
+//         */
+//        payProducer.getProducer().sendOneway(message);
+
         /**
-         * 用于给logserver等不需要响应,对性能要求比较高,对可靠性要求比较低的服务 发送请求
-         * 返回值为空,ublic void sendOneway(Message msg)
+         * 发送消息的时候,同一个topic选择不同的queue
+         *
+         * 用于负载均衡队列
          */
-        payProducer.getProducer().sendOneway(message);
+        SendResult sendResult = payProducer.getProducer().send(message, new MessageQueueSelector() {
+            @Override
+            /**
+             * mqs是消息队列
+             * msg是投递的消息
+             * arg是投递队列的下标
+             */
+            public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
+                int queueNum = Integer.parseInt(arg.toString());
+                return mqs.get(queueNum);
+            }
+        }, 0);
         return new HashMap<>();
     }
-
 }
