@@ -68,17 +68,19 @@ public class PayConsumer {
                     /**
                      * 模拟消费失败,producer发送的消息的key是123
                      */
-                    if (msg.getKeys().equals("123")) {
-                        throw new Exception();
-                    }
+//                    if (msg.getKeys().equals("123")) {
+//                        throw new Exception();
+//                    }
                     System.out.printf("topic = %s,body = %s,tags = %s,keys = %s", topic, body, tags, keys);
 
                     return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
 
                 } catch (Exception e) {
                     System.out.println("消费异常");
-
-                    if (times == 2) {
+                    /**
+                     * 防止分布式 击穿效应
+                     */
+                    if (times >= 2) {
                         System.out.println("重复消费次数大于二,记录下异常,等待开发人员排插");
                         //TODO 记录数据库,等待开发人员排插
                         return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;

@@ -100,6 +100,13 @@ public class PayController {
                 return mqs.get(queueNum);
             }
         }, 0);
+        /**
+         * 打印出来,看一下是否是放在了arg下标对应的队列里
+         * SendResult [sendStatus=SEND_OK, msgId=C0A8016721BC18B4AAC27B3F064C0000, offsetMsgId=C0A8F50400002A9F000000000002DDAF, messageQueue=MessageQueue [topic=xdclass_pay_test_topic, brokerName=broker-a, queueId=0], queueOffset=5]
+         * ConsumeMessageThread_1 Recieve New Message hello rocketmq = 624
+         */
+        System.out.println(sendResult);
+
         return new HashMap<>();
     }
 }
