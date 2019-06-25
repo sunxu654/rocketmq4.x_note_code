@@ -1,6 +1,8 @@
 package com.sunxu.rocketmq.controller;
 
+import com.sunxu.rocketmq.domain.ProductOrder;
 import com.sunxu.rocketmq.jms.JmsConfig;
+import com.sunxu.rocketmq.jms.PayConsumer;
 import com.sunxu.rocketmq.jms.PayProducer;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -23,6 +26,38 @@ public class PayController {
     @Autowired
     PayProducer payProducer;
 
+    /**
+     * 顺序投递消息到消息队列
+     * 并在consumer端  顺序消费
+     * <p>
+     * 用于订单的顺序加工(订单创建,订单支付,订单完成)
+     *
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingException
+     * @throws MQClientException
+     * @throws MQBrokerException
+     */
+    @RequestMapping("/api/v1/order")
+    public Object callback() throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
+        List<ProductOrder> list = ProductOrder.getOrderList();
+        for (ProductOrder temp : list) {
+            Message message = new Message(JmsConfig.ORDER_TOPIC, "",
+                    temp.getOrderId() + "", temp.toString().getBytes());
+            SendResult sendResult = payProducer.getProducer().send(message, new MessageQueueSelector() {
+                @Override
+                public MessageQueue select(List<MessageQueue> mqs, Message msg, Object arg) {
+                    Long id = (Long) arg;
+                    Long index = (id % (mqs.size()));
+
+                    return mqs.get(index.intValue());
+                }
+            }, temp.getOrderId());
+            System.out.println(sendResult.toString());
+
+        }
+        return new HashMap<>();
+    }
 
     @RequestMapping("/api/v1/pay_cb")
     public Object callback(String text) throws InterruptedException, RemotingException, MQClientException, MQBrokerException {
