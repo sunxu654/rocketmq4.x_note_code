@@ -53,7 +53,7 @@ public class PayController {
                     return mqs.get(index.intValue());
                 }
             }, temp.getOrderId());
-            System.out.println(sendResult.toString());
+            System.out.println("发送结果:"+ sendResult.toString()+"发送订单消息为:"+ temp.getType()+";订单id:"+temp.getOrderId());
 
         }
         return new HashMap<>();
