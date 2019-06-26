@@ -1,27 +1,22 @@
 package com.sunxu.rocketmq.jms;
 
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
-import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
 @Component
-public class PayConsumer {
+public class FilterPayConsumer {
 
-    private String consumerGroup = "consumer_group";
+    private String consumerGroup = "consumer_group3";
 
 
     private DefaultMQPushConsumer consumer;
 
-    public PayConsumer() throws MQClientException {
+    public FilterPayConsumer() throws MQClientException {
 
         /**
          * 构造器里创建归属某个组的cosumer实例
@@ -39,7 +34,11 @@ public class PayConsumer {
         /**
          * 订阅某个主题,并消费标签匹配为 * 的消息
          */
-        consumer.subscribe(JmsConfig.TOPIC, "order2");
+        /**
+         * 注意：消费者订阅关系要一致，不然会消费混乱，甚至消息丢失
+         * 订阅关系一致：订阅关系由Topic和Tag组成，同一个group name，订阅的 topic和tag必须是一样的
+         */
+        consumer.subscribe(JmsConfig.TOPIC, "order1||order3");
 
         /**
          * 取出消息的消费
@@ -47,13 +46,11 @@ public class PayConsumer {
         consumer.registerMessageListener((MessageListenerConcurrently) (list, consumeConcurrentlyContext) -> {
 
                 MessageExt msg = list.get(0);
-                System.out.printf("%s Recieve New Message %s \n (过滤order2)",Thread.currentThread().getName(),
+                System.out.printf("%s Recieve New Message %s (过滤order1)\n",Thread.currentThread().getName(),
                         new String(msg.getBody()));
                 /**
                  * msg的重复消费次数,上限在consumer中设置
                  */
-                int times = msg.getReconsumeTimes();
-                System.out.println("重试消费次数"+times);
 
 
             try{
@@ -72,15 +69,6 @@ public class PayConsumer {
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
 
             } catch (Exception e) {
-                System.out.println("消费异常");
-                /**
-                 * 防止分布式 击穿效应
-                 */
-                if (times >= 2) {
-                    System.out.println("重复消费次数大于二,记录下异常,等待开发人员排插");
-                    //TODO 记录数据库,等待开发人员排插
-                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
-                }
                 e.printStackTrace();
                 return ConsumeConcurrentlyStatus.RECONSUME_LATER;
             }
