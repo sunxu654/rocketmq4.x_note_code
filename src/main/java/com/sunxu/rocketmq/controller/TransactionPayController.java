@@ -27,7 +27,7 @@ public class TransactionPayController {
     @RequestMapping("/api/v1/tran")
     public Object callback(String tag, String otherParam) throws Exception {
 
-        Message message = new Message(JmsConfig.TOPIC, tag,
+        Message message = new Message(JmsConfig.TRAN_TOPIC, tag,
                 tag + "_key", tag.getBytes());
         TransactionSendResult sendResult = transactionProducer.getProducer().sendMessageInTransaction(message, otherParam);
         System.out.println("发送结果" + sendResult);

@@ -56,6 +56,7 @@ public class TransactionProducer {
         producer.setNamesrvAddr(JmsConfig.NAME_SERVER);
         producer.setTransactionListener(transactionListener);
         producer.setExecutorService(executorService);
+        //TODO 直接使用producer.start会抛异常(为什么?)
         start();
     }
 
@@ -63,6 +64,7 @@ public class TransactionProducer {
         try {
             /**
              * 启动的是producer
+             *
              */
             this.producer.start();
         } catch (MQClientException e) {
@@ -85,7 +87,7 @@ class TransactionListenerImpl implements TransactionListener {
 
     @Override
     public LocalTransactionState executeLocalTransaction(Message msg, Object arg) {
-        System.out.println("执行本地事务");
+        System.out.println("--------executeLocalTransaction----------");
         String body = new String(msg.getBody());
         String key = msg.getKeys();
         String transactionId = msg.getTransactionId();
@@ -113,7 +115,7 @@ class TransactionListenerImpl implements TransactionListener {
     @Override
     public LocalTransactionState checkLocalTransaction(MessageExt msg) {
 
-        System.out.println("执行本地事务");
+        System.out.println("-------checkLocalTransaction--------");
         String body = new String(msg.getBody());
         String key = msg.getKeys();
         String transactionId = msg.getTransactionId();

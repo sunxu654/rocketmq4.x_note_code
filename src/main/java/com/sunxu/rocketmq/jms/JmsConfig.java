@@ -19,6 +19,7 @@ public class JmsConfig {
     public static final String NAME_SERVER = "192.168.245.5:9876";
     public static final String TOPIC = "xdclass_pay_test_topic";
     public static final String ORDER_TOPIC = "order_topic";
+    public static final String TRAN_TOPIC = "tran_topic";
 
     /**
      * 讲解RocketMQ主从同步必备知识点
