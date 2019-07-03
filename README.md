@@ -41,4 +41,37 @@ Censumer会平均分配queue的数量
 
 扩展思维：为什么高并发情况下ConcurrentHashMap比HashTable和HashMap更高效且线程安全？
 
-提示：分段锁Segment
+提示：分段锁Segment(不是单纯的禁止并发,而是在每一个Map上都加一个锁,同一个map只能被不同进程串行处理,但是多个Map是可以并发处理的)
+
+## 消费端知识点
+
+**Topic下队列的奇偶数会影响Customer个数里面的消费数量**  
+
++ 如果是4个队列，8个消息，4个节点则会各消费2条，如果不对等，则负载均衡会分配不均， 
+
++ 如果consumer实例的数量比message queue的总数量还多的话，多出来的consumer实例将无法分到queue，也就无法消费到消息，也就无法起到分摊负载的作用，所以需要控制让queue的总数量大于等于consumer的数量 
+
+
+**集群模式（默认）：**  
+
+Consumer实例平均分摊消费生产者发送的消息  
+
+**广播模式：**  
+
+广播模式下消费消息：投递到Broker的消息会被每个Consumer进行消费，一条消息被多个Consumer消费，广播消费中ConsumerGroup暂时无用  
+怎么切换模式：通过setMessageModel0
+
+**监听内容**  
+
+一般是监听*，或者指定tag，||运算
+不建议使用多个Tag，每个队列单一职责，多个队列多个职责
+
+**消费者订阅关系要一致，不然会消费混乱，甚至消息丢失**  
+
+订阅关系一致：订阅关系由Topic和Tag组成，同一个group name，订阅的topic和tag必须是一样的
+
+**消息过滤方式**  
+
++ 在Broker 端进行MessageTag过滤，遍历message queue存储的message tag和订阅传递的tag的hashcode不一样则跳过，符合的则传输给Consumer，在consumer queue存储的是对应的hashcode，对比也是通过hashcode对比；Consumer收到过滤消息后也会进行匹配操作，但是是对比真实的message tag而不是hashcode oconsume queue存储使用hashcode定长，节约空间
++ 过滤中不访问commitlog，可以高效过滤
++ 如果存在hash冲突，Consumer端可以进行再次确认
